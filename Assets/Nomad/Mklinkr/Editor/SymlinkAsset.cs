@@ -11,7 +11,7 @@ public class SymlinkAsset : ScriptableObject
 
     public void RebuildLink()
     {
-        Mklinkr.MakeLink(TargetPath, SourcePath);
+        Mklinkr.MakeLink(SourcePath, TargetPath);
     }
 
     public static SymlinkAsset GetAsset(string name)
