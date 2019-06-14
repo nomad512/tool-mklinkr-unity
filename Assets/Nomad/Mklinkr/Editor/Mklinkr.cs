@@ -61,7 +61,6 @@ static public class Mklinkr
 
         var tempDirPath = path + "_temp";
         var dirName = Path.GetFileName(path);
-        var tempDirName = Path.GetFileName(tempDirPath);
 
         // Because the files do not exist in this location (they are symbolically linked) they must first be copied to a new directory.
         cmdText = string.Format("/C xcopy \"{0}\" \"{1}\" /s/i", path, tempDirPath);
