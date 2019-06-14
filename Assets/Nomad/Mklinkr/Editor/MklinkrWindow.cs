@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 using UnityEditor;
 
@@ -38,39 +39,80 @@ public class MklinkrWindow : EditorWindow
         }
     }
 
+    private bool TryGetPathFromDrop(Rect rect, ref string path)
+    {
+        var evt = Event.current;
+        GUI.enabled = true;
+
+        switch (evt.type)
+        {
+            case EventType.DragUpdated:
+            case EventType.DragPerform:
+
+                if (!rect.Contains(evt.mousePosition))
+                {
+                    return false;
+                }
+
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                if (evt.type == EventType.DragPerform)
+                {
+                    DragAndDrop.AcceptDrag();
+
+                    if (DragAndDrop.paths.Length > 0)
+                    {
+                        path = DragAndDrop.paths[0];
+                        return true;
+                    }
+                }
+                break;
+        }
+        return false;
+    }
+
     private void OnGUI_MakeLink()
     {
         // Edit Path to Source 
-        GUILayout.BeginVertical();
+        Rect sourceDropRect;
+        sourceDropRect = EditorGUILayout.BeginVertical();
         {
             GUILayout.Label("Source:");
-            GUILayout.BeginHorizontal();
-            _pathToSource = EditorGUILayout.TextArea(_pathToSource);
-            if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+            EditorGUILayout.BeginHorizontal();
             {
-                GUI.SetNextControlName("btn");
-                _pathToSource = EditorUtility.OpenFolderPanel("Select mklink source", "", "");
-                GUI.FocusControl("btn");
+                _pathToSource = EditorGUILayout.TextArea(_pathToSource);
+                TryGetPathFromDrop(sourceDropRect, ref _pathToSource);
+                if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+                {
+                    GUI.SetNextControlName("btn");
+                    _pathToSource = EditorUtility.OpenFolderPanel("Select mklink source", "", "");
+                    GUI.FocusControl("btn");
+                }
             }
-            GUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();
         }
-        GUILayout.EndVertical();
+        EditorGUILayout.EndVertical();
+
 
         // Edit Path to Target 
-        GUILayout.BeginVertical();
+        Rect targetDropRect;
+        targetDropRect = EditorGUILayout.BeginVertical();
         {
             GUILayout.Label("Target:");
-            GUILayout.BeginHorizontal();
-            _pathToTarget = EditorGUILayout.TextArea(_pathToTarget);
-            if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+            EditorGUILayout.BeginHorizontal();
             {
-                GUI.SetNextControlName("btn");
-                _pathToTarget = EditorUtility.OpenFolderPanel("Select mklink target", "", "");
-                GUI.FocusControl("btn");
+                _pathToTarget = EditorGUILayout.TextArea(_pathToTarget);
+                TryGetPathFromDrop(targetDropRect, ref _pathToTarget);
+                if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+                {
+                    GUI.SetNextControlName("btn");
+                    _pathToTarget = EditorUtility.OpenFolderPanel("Select mklink target", "", "");
+                    GUI.FocusControl("btn");
+                }
             }
-            GUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();
         }
-        GUILayout.EndVertical();
+        EditorGUILayout.EndVertical();
 
         var targetIsNewOrEmpty = Mklinkr.ValidateIsNewOrEmptyDirectory(_pathToTarget);
         var sourceOk = Directory.Exists(_pathToSource);
@@ -110,26 +152,29 @@ public class MklinkrWindow : EditorWindow
         }
     }
 
-    string _cachePath;
-    string _finalPath;
-
     private void OnGUI_RemoveLink()
     {
         // Edit Path
-        GUILayout.BeginVertical();
+        Rect dropRect;
+        dropRect = EditorGUILayout.BeginVertical();
         {
             GUILayout.Label("Directory to Clean:");
-            GUILayout.BeginHorizontal();
-            _pathToClean = EditorGUILayout.TextArea(_pathToClean);
-            if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+            EditorGUILayout.BeginHorizontal();
             {
-                GUI.SetNextControlName("btn");
-                _pathToClean = EditorUtility.OpenFolderPanel("Select mklink target", "", "");
-                GUI.FocusControl("btn");
+                _pathToClean = EditorGUILayout.TextArea(_pathToClean);
+                if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+                {
+                    GUI.SetNextControlName("btn");
+                    _pathToClean = EditorUtility.OpenFolderPanel("Select mklink target", "", "");
+                    GUI.FocusControl("btn");
+                }
             }
-            GUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();
         }
-        GUILayout.EndVertical();
+        EditorGUILayout.EndVertical();
+
+        TryGetPathFromDrop(dropRect, ref _pathToClean);
+
 
         var directoryExists = Directory.Exists(_pathToClean);
         var isSymlink = false;
