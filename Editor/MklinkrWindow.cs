@@ -3,205 +3,208 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-public class MklinkrWindow : EditorWindow
+namespace IllTaco
 {
-    private string _pathToTarget;
-    private string _pathToSource;
-    private string _pathToClean;
-
-    private const int _buttonWidth = 24;
-    private readonly string[] _toolbarTabs = new string[] { "Make", "Remove" };
-
-    private int _toolbarTab = 0;
-
-    [MenuItem("Nomad/Window/Mklinkr")]
-    [MenuItem("Window/Nomad/Mklinkr")]
-    private static void Open()
+    public class MklinkrWindow : EditorWindow
     {
-        GetWindow<MklinkrWindow>();
-    }
+        private string _pathToTarget;
+        private string _pathToSource;
+        private string _pathToClean;
 
-    private void OnGUI()
-    {
-        EditorStyles.textField.wordWrap = true;
+        private const int _buttonWidth = 24;
+        private readonly string[] _toolbarTabs = new string[] { "Make", "Remove" };
 
-        _toolbarTab = GUILayout.Toolbar(_toolbarTab, _toolbarTabs);
-        switch (_toolbarTab)
+        private int _toolbarTab = 0;
+
+        [MenuItem("IllTaco/Window/Mklinkr")]
+        [MenuItem("Window/IllTaco/Mklinkr")]
+        private static void Open()
         {
-            default:
-            case 0:
-                OnGUI_MakeLink();
-                break;
-
-            case 1:
-                OnGUI_RemoveLink();
-                break;
+            GetWindow<MklinkrWindow>();
         }
-    }
 
-    private bool TryGetPathFromDrop(Rect rect, ref string path)
-    {
-        var evt = Event.current;
-        GUI.enabled = true;
-
-        switch (evt.type)
+        private void OnGUI()
         {
-            case EventType.DragUpdated:
-            case EventType.DragPerform:
+            EditorStyles.textField.wordWrap = true;
 
-                if (!rect.Contains(evt.mousePosition))
-                {
-                    return false;
-                }
+            _toolbarTab = GUILayout.Toolbar(_toolbarTab, _toolbarTabs);
+            switch (_toolbarTab)
+            {
+                default:
+                case 0:
+                    OnGUI_MakeLink();
+                    break;
 
-                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                case 1:
+                    OnGUI_RemoveLink();
+                    break;
+            }
+        }
 
-                if (evt.type == EventType.DragPerform)
-                {
-                    DragAndDrop.AcceptDrag();
+        private bool TryGetPathFromDrop(Rect rect, ref string path)
+        {
+            var evt = Event.current;
+            GUI.enabled = true;
 
-                    if (DragAndDrop.paths.Length > 0)
+            switch (evt.type)
+            {
+                case EventType.DragUpdated:
+                case EventType.DragPerform:
+
+                    if (!rect.Contains(evt.mousePosition))
                     {
-                        path = DragAndDrop.paths[0];
-                        return true;
+                        return false;
+                    }
+
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                    if (evt.type == EventType.DragPerform)
+                    {
+                        DragAndDrop.AcceptDrag();
+
+                        if (DragAndDrop.paths.Length > 0)
+                        {
+                            path = DragAndDrop.paths[0];
+                            return true;
+                        }
+                    }
+                    break;
+            }
+            return false;
+        }
+
+        private void OnGUI_MakeLink()
+        {
+            // Edit Path to Source 
+            Rect sourceDropRect;
+            sourceDropRect = EditorGUILayout.BeginVertical();
+            {
+                GUILayout.Label("Source:");
+                EditorGUILayout.BeginHorizontal();
+                {
+                    _pathToSource = EditorGUILayout.TextArea(_pathToSource);
+                    TryGetPathFromDrop(sourceDropRect, ref _pathToSource);
+                    if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+                    {
+                        GUI.SetNextControlName("btn");
+                        _pathToSource = EditorUtility.OpenFolderPanel("Select mklink source", "", "");
+                        GUI.FocusControl("btn");
                     }
                 }
-                break;
-        }
-        return false;
-    }
-
-    private void OnGUI_MakeLink()
-    {
-        // Edit Path to Source 
-        Rect sourceDropRect;
-        sourceDropRect = EditorGUILayout.BeginVertical();
-        {
-            GUILayout.Label("Source:");
-            EditorGUILayout.BeginHorizontal();
-            {
-                _pathToSource = EditorGUILayout.TextArea(_pathToSource);
-                TryGetPathFromDrop(sourceDropRect, ref _pathToSource);
-                if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
-                {
-                    GUI.SetNextControlName("btn");
-                    _pathToSource = EditorUtility.OpenFolderPanel("Select mklink source", "", "");
-                    GUI.FocusControl("btn");
-                }
+                EditorGUILayout.EndHorizontal();
             }
-            EditorGUILayout.EndHorizontal();
-        }
-        EditorGUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
 
 
-        // Edit Path to Target 
-        Rect targetDropRect;
-        targetDropRect = EditorGUILayout.BeginVertical();
-        {
-            GUILayout.Label("Target:");
-            EditorGUILayout.BeginHorizontal();
+            // Edit Path to Target 
+            Rect targetDropRect;
+            targetDropRect = EditorGUILayout.BeginVertical();
             {
-                _pathToTarget = EditorGUILayout.TextArea(_pathToTarget);
-                TryGetPathFromDrop(targetDropRect, ref _pathToTarget);
-                if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+                GUILayout.Label("Target:");
+                EditorGUILayout.BeginHorizontal();
                 {
-                    GUI.SetNextControlName("btn");
-                    _pathToTarget = EditorUtility.OpenFolderPanel("Select mklink target", "", "");
-                    GUI.FocusControl("btn");
+                    _pathToTarget = EditorGUILayout.TextArea(_pathToTarget);
+                    TryGetPathFromDrop(targetDropRect, ref _pathToTarget);
+                    if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+                    {
+                        GUI.SetNextControlName("btn");
+                        _pathToTarget = EditorUtility.OpenFolderPanel("Select mklink target", "", "");
+                        GUI.FocusControl("btn");
+                    }
                 }
+                EditorGUILayout.EndHorizontal();
             }
-            EditorGUILayout.EndHorizontal();
-        }
-        EditorGUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
 
-        var targetIsNewOrEmpty = Mklinkr.ValidateIsNewOrEmptyDirectory(_pathToTarget);
-        var sourceOk = Directory.Exists(_pathToSource);
-        bool targetOk;
-        try
-        {
-            targetOk = Path.IsPathRooted(_pathToTarget);
-        }
-        catch
-        {
-            targetOk = false;
-        }
-
-        // Display Info
-        if (!targetIsNewOrEmpty)
-        {
-            EditorGUILayout.HelpBox("Target is not empty. It will be overwritten!", MessageType.Warning);
-        }
-        if (!sourceOk)
-        {
-            EditorGUILayout.HelpBox("Source directory is invalid", MessageType.Error);
-        }
-        if (!targetOk)
-        {
-            EditorGUILayout.HelpBox("Target directory is invalid", MessageType.Error);
-        }
-        if (sourceOk && targetOk)
-        {
-            EditorGUILayout.HelpBox("Ready to create a symbolic link :)", MessageType.Info);
-        }
-
-        // Button
-        GUI.enabled = sourceOk && targetOk;
-        if (GUILayout.Button("Make Symbolic Link", GUILayout.Height(34)))
-        {
-            Mklinkr.MakeLink(_pathToSource, _pathToTarget);
-        }
-    }
-
-    private void OnGUI_RemoveLink()
-    {
-        // Edit Path
-        Rect dropRect;
-        dropRect = EditorGUILayout.BeginVertical();
-        {
-            GUILayout.Label("Directory to Clean:");
-            EditorGUILayout.BeginHorizontal();
+            var targetIsNewOrEmpty = Mklinkr.ValidateIsNewOrEmptyDirectory(_pathToTarget);
+            var sourceOk = Directory.Exists(_pathToSource);
+            bool targetOk;
+            try
             {
-                _pathToClean = EditorGUILayout.TextArea(_pathToClean);
-                if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+                targetOk = Path.IsPathRooted(_pathToTarget);
+            }
+            catch
+            {
+                targetOk = false;
+            }
+
+            // Display Info
+            if (!targetIsNewOrEmpty)
+            {
+                EditorGUILayout.HelpBox("Target is not empty. It will be overwritten!", MessageType.Warning);
+            }
+            if (!sourceOk)
+            {
+                EditorGUILayout.HelpBox("Source directory is invalid", MessageType.Error);
+            }
+            if (!targetOk)
+            {
+                EditorGUILayout.HelpBox("Target directory is invalid", MessageType.Error);
+            }
+            if (sourceOk && targetOk)
+            {
+                EditorGUILayout.HelpBox("Ready to create a symbolic link :)", MessageType.Info);
+            }
+
+            // Button
+            GUI.enabled = sourceOk && targetOk;
+            if (GUILayout.Button("Make Symbolic Link", GUILayout.Height(34)))
+            {
+                Mklinkr.MakeLink(_pathToSource, _pathToTarget);
+            }
+        }
+
+        private void OnGUI_RemoveLink()
+        {
+            // Edit Path
+            Rect dropRect;
+            dropRect = EditorGUILayout.BeginVertical();
+            {
+                GUILayout.Label("Directory to Clean:");
+                EditorGUILayout.BeginHorizontal();
                 {
-                    GUI.SetNextControlName("btn");
-                    _pathToClean = EditorUtility.OpenFolderPanel("Select mklink target", "", "");
-                    GUI.FocusControl("btn");
+                    _pathToClean = EditorGUILayout.TextArea(_pathToClean);
+                    if (GUILayout.Button("...", GUILayout.Width(_buttonWidth)))
+                    {
+                        GUI.SetNextControlName("btn");
+                        _pathToClean = EditorUtility.OpenFolderPanel("Select mklink target", "", "");
+                        GUI.FocusControl("btn");
+                    }
                 }
+                EditorGUILayout.EndHorizontal();
             }
-            EditorGUILayout.EndHorizontal();
-        }
-        EditorGUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
 
-        TryGetPathFromDrop(dropRect, ref _pathToClean);
+            TryGetPathFromDrop(dropRect, ref _pathToClean);
 
 
-        var directoryExists = Directory.Exists(_pathToClean);
-        var isSymlink = false;
+            var directoryExists = Directory.Exists(_pathToClean);
+            var isSymlink = false;
 
-        // Info
-        if (!directoryExists)
-        {
-            EditorGUILayout.HelpBox("The directory is invalid", MessageType.Error);
-        }
-        else
-        {
-            isSymlink = Mklinkr.IsSymbolic(_pathToClean);
-            if (isSymlink)
+            // Info
+            if (!directoryExists)
             {
-                EditorGUILayout.HelpBox("The directory is a Symbolic Link", MessageType.Info);
+                EditorGUILayout.HelpBox("The directory is invalid", MessageType.Error);
             }
             else
             {
-                EditorGUILayout.HelpBox("The directory is not a Symbolic Link", MessageType.Error);
+                isSymlink = Mklinkr.IsSymbolic(_pathToClean);
+                if (isSymlink)
+                {
+                    EditorGUILayout.HelpBox("The directory is a Symbolic Link", MessageType.Info);
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("The directory is not a Symbolic Link", MessageType.Error);
+                }
             }
-        }
 
-        // Button
-        GUI.enabled = directoryExists && isSymlink;
-        if (GUILayout.Button("Remove Symbolic Link", GUILayout.Height(34)))
-        {
-            Mklinkr.RemoveLink(_pathToClean);
+            // Button
+            GUI.enabled = directoryExists && isSymlink;
+            if (GUILayout.Button("Remove Symbolic Link", GUILayout.Height(34)))
+            {
+                Mklinkr.RemoveLink(_pathToClean);
+            }
         }
     }
 }
