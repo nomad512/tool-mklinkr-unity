@@ -1,13 +1,13 @@
 {
-  "name": "com.illtaco.mklinkr",
-  "displayName": "mklinkr",
+  "name": "com.illtaco.mklinkr.unity",
+  "displayName": "Mklinkr",
   "version": "0.1.0",
   "unity": "2018.3",
-  "description": "Use the mklinkr window to create symbolic links.",
+  "description": "Use the Mklinkr window to create symbolic links.",
   "dependencies": {},
   "author": {
-    "name": "Damon Chandler",
+    "name": "Taco Illuminati",
     "email": "damon@tacoilluminati.com",
-    "url": "www.illtaco.com"
+    "url": "www.github.com/tacoilluminati/Mklinkr"
   }
 }
